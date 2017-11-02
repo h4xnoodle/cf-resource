@@ -39,11 +39,21 @@ func (command *Command) Run(request Request) (Response, error) {
 		return Response{}, err
 	}
 
-	err = command.paas.PushApp(
-		request.Params.ManifestPath,
-		request.Params.Path,
-		request.Params.CurrentAppName,
-	)
+	if len(request.Params.MultiBuildpacks) != 0 {
+		// TODO handle environment variables passed as params for resource
+		err = command.paas.V3PushApp(
+			request.Params.MultiBuildpacks,
+			request.Params.Path,
+			request.Params.CurrentAppName,
+		)
+	} else {
+		err = command.paas.PushApp(
+			request.Params.ManifestPath,
+			request.Params.Path,
+			request.Params.CurrentAppName,
+		)
+	}
+
 	if err != nil {
 		return Response{}, err
 	}

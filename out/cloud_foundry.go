@@ -3,12 +3,14 @@ package out
 import (
 	"os"
 	"os/exec"
+	"runtime"
 )
 
 type PAAS interface {
 	Login(api string, username string, password string, insecure bool) error
 	Target(organization string, space string) error
 	PushApp(manifest string, path string, currentAppName string) error
+	V3PushApp(buildpacks []string, path string, currentAppName string) error
 }
 
 type CloudFoundry struct{}
@@ -56,6 +58,24 @@ func (cf *CloudFoundry) PushApp(manifest string, path string, currentAppName str
 		// path is a zip file, add it to the args
 		args = append(args, "-p", path)
 	}
+
+	return cf.cf(args...).Run()
+}
+
+func (cf *CloudFoundry) V3PushApp(buildpacks []string, path string, currentAppName string) error {
+	args := []string{}
+
+	if currentAppName == "" {
+		return runtime.Error("Current app name cannot be blank since manifests are not supported for V3 push.")
+	}
+
+	args = append(args, "v3-push", currentAppName)
+
+	for _, b := range buildpacks {
+		args = append(args, "-b", b)
+	}
+
+	args = append(args, "-p", path)
 
 	return cf.cf(args...).Run()
 }
