@@ -3,7 +3,7 @@ package out
 import (
 	"os"
 	"os/exec"
-	"runtime"
+	"errors"
 )
 
 type PAAS interface {
@@ -66,7 +66,7 @@ func (cf *CloudFoundry) V3PushApp(buildpacks []string, path string, currentAppNa
 	args := []string{}
 
 	if currentAppName == "" {
-		return runtime.Error("Current app name cannot be blank since manifests are not supported for V3 push.")
+		return errors.New("current app name cannot be blank since manifests are not supported for V3 push")
 	}
 
 	args = append(args, "v3-push", currentAppName)
